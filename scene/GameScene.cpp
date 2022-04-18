@@ -35,11 +35,12 @@ void GameScene::Initialize() {
 	//ビュープロジェクションの初期化
 	viewProjection_.Initialize();
 
-	//音声再生
-	//audio_->PlayWave(soundDataHandle_);
+	worldTransfrom_.scale_ = {5.0f, 5.0f, 5.0f};
+	//worldTransfrom_.rotation_ = {0.0f, XM_PI / 4.0f, 0.0f};
 
-	//ループ再生
-	voiceHandle_ = audio_->PlayWave(soundDataHandle_, true);
+	worldTransfrom_.translation_ = {10.0f, 10.0f, 10.0f};
+	worldTransfrom_.rotation_ = {XMConvertToRadians(45.0f), XMConvertToRadians(45.0f), 0.0f};
+	worldTransfrom_.Initialize();
 }
 
 void GameScene::Update() { 
@@ -51,11 +52,6 @@ void GameScene::Update() {
 	position.y += 1.0f;
 	//移動した座標をスプライトに反映
 	sprite_->SetPosition(position);
-
-	if (input_->TriggerKey(DIK_SPACE)) {
-		//音声停止
-		audio_->StopWave(voiceHandle_);
-	}
 
 	//デバッグテキストの表示
 	//debugText_->Print("Kaizokuou ni oreha naru.", 50, 50, 1.0f);
@@ -71,7 +67,7 @@ void GameScene::Update() {
 	std::string strDebug = std::string("Value:") + std::to_string(value_);
 
 	//デバッグテキストの表示
-	debugText_->Print(strDebug, 50, 50, 1.0f);
+	//debugText_->Print(strDebug, 50, 50, 1.0f);
 }
 
 void GameScene::Draw() {
@@ -114,7 +110,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
-	sprite_->Draw();
+	//sprite_->Draw();
 
 
 	// デバッグテキストの描画
