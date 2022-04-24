@@ -43,7 +43,7 @@ class GameScene {
 	void Draw();
 
 	//ワールドトランスフォーム
-	WorldTransform worldTransfrom_[100];
+	WorldTransform worldTransfrom_[9];
 	//ビュープロジェクション
 	ViewProjection viewProjection_;
 
@@ -63,6 +63,17 @@ class GameScene {
 	/// ゲームシーン用
 	/// </summary>
 	
-	float viewAngle = 0.0f;
+	//パーツID
+	enum PartId {
+		Root,	//大元
+		Spine,	//脊椎
+		Chest,	//胸
+		Head,	//頭
+		ArmL,	//左腕
+		ArmR,	//右腕
+		Hip,	//尻
+		LegL,	//左足
+		LegR,	//右足
+	};
 
 };
