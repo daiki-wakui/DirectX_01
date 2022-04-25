@@ -80,8 +80,8 @@ void GameScene::Update() {
 	end.z = start.z + length.z;
 
 	//回転を考慮した座標を設定
-	end.x = sinf(worldTransfrom_.rotation_.y) + start.x;
-	end.z = cosf(worldTransfrom_.rotation_.y) + start.z;
+	end.x = start.x + sinf(worldTransfrom_.rotation_.y);
+	end.z = start.z + cosf(worldTransfrom_.rotation_.y);
 
 	//始点と終点から正面ベクトルを求める
 	frontVec.x = end.x - start.x;
