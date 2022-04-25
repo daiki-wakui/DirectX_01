@@ -49,28 +49,20 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
-	//正面ベクトルの長さ
+	//正面ベクトルの長さの成分
 	XMFLOAT3 length = {0, 0, 10};
-
-	float length2 = 0;
-
+	//正面ベクトルの長さ(大きさ)
+	float frontVecLength = 0;
 	//正面ベクトル
 	XMFLOAT3 frontVec = {0, 0, 0};
-
 	//始点
 	XMFLOAT3 start = {worldTransfrom_.translation_};
-
 	//終点
 	XMFLOAT3 end = {0, 0, 0};
-
 	//オブジェクトの移動ベクトル
 	XMFLOAT3 move = {0, 0, 0};
-
 	//オブジェクトの回転ベクトル
 	XMFLOAT3 rotaMove = {0, 0, 0};
-
-	//オブジェクトの移動スピード
-	const float obSpeed = 0.2f;
 
 	//オブジェクトの回転スピード
 	const float rotaSpeed = 0.05f;
@@ -82,23 +74,32 @@ void GameScene::Update() {
 		rotaMove = {0, -rotaSpeed, 0};
 	}
 
+	//終点座標を設定
 	end.x = start.x + length.x;
 	end.y = start.y + length.y;
 	end.z = start.z + length.z;
 
+	//回転を考慮した座標を設定
 	end.x = sinf(worldTransfrom_.rotation_.y) + start.x;
 	end.z = cosf(worldTransfrom_.rotation_.y) + start.z;
 
-	frontVec.x = end.x-start.x;
-	frontVec.y = end.y-start.y;
-	frontVec.z = end.z-start.z;
+	//始点と終点から正面ベクトルを求める
+	frontVec.x = end.x - start.x;
+	frontVec.y = end.y - start.y;
+	frontVec.z = end.z - start.z;
 
-	length2 = sqrtf((length.x * length.x) + (length.y * length.y) + (length.z * length.z));
+	//正面ベクトルの長さ
+	frontVecLength = sqrtf(
+		(length.x * length.x) +
+		(length.y * length.y) +
+		(length.z * length.z));
 
-	frontVec.x /= length2;
-	frontVec.y /= length2;
-	frontVec.z /= length2;
+	//正面ベクトルの正規化
+	frontVec.x /= frontVecLength;
+	frontVec.y /= frontVecLength;
+	frontVec.z /= frontVecLength;
 
+	//始点座標に正面ベクトルの値を加算or減算
 	if (input_->PushKey(DIK_UP)) {
 		start.x += frontVec.x;
 		start.y += frontVec.y;
