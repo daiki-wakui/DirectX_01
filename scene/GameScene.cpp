@@ -50,7 +50,9 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 	//正面ベクトルの長さ
-	XMFLOAT3 length = {0, 0, 1};
+	XMFLOAT3 length = {0, 0, 10};
+
+	float length2 = 0;
 
 	//正面ベクトル
 	XMFLOAT3 frontVec = {0, 0, 0};
@@ -73,20 +75,6 @@ void GameScene::Update() {
 	//オブジェクトの回転スピード
 	const float rotaSpeed = 0.05f;
 
-	//オブジェクトの前進と後退
-	if (input_->PushKey(DIK_UP)) {
-		move = {
-			sinf(worldTransfrom_.rotation_.y)*obSpeed,
-			0,
-			cosf(worldTransfrom_.rotation_.y)*obSpeed
-		};
-	} else if (input_->PushKey(DIK_DOWN)) {
-		move = {
-			sinf(worldTransfrom_.rotation_.y) * -obSpeed,
-			0,
-			cosf(worldTransfrom_.rotation_.y) * - obSpeed
-		};
-	}
 	//オブジェクトの回転
 	if (input_->PushKey(DIK_RIGHT)) {
 		rotaMove = {0, rotaSpeed, 0};
@@ -94,34 +82,43 @@ void GameScene::Update() {
 		rotaMove = {0, -rotaSpeed, 0};
 	}
 
-	//ベクトルの加算
-	worldTransfrom_.translation_.x += move.x;
-	worldTransfrom_.translation_.z += move.z;
-
-	//回転
-	worldTransfrom_.rotation_.y += rotaMove.y;
-
 	end.x = start.x + length.x;
 	end.y = start.y + length.y;
 	end.z = start.z + length.z;
 
-	end.x = sinf(worldTransfrom_.rotation_.y);
-	end.z = cosf(worldTransfrom_.rotation_.y);
-	
-	/*frontVec.x = end.x - start.x;
-	frontVec.y = end.y - start.y;
-	frontVec.z = end.z - start.z;
+	end.x = sinf(worldTransfrom_.rotation_.y) + start.x;
+	end.z = cosf(worldTransfrom_.rotation_.y) + start.z;
 
-	frontVec.x /= length.x;
-	frontVec.y /= length.y;
-	frontVec.z /= length.z;
-	
-	start.x += frontVec.x;
-	start.y += frontVec.x;
-	start.z += frontVec.z;*/
+	frontVec.x = end.x-start.x;
+	frontVec.y = end.y-start.y;
+	frontVec.z = end.z-start.z;
 
+	length2 = sqrtf((length.x * length.x) + (length.y * length.y) + (length.z * length.z));
+
+	frontVec.x /= length2;
+	frontVec.y /= length2;
+	frontVec.z /= length2;
+
+	if (input_->PushKey(DIK_UP)) {
+		start.x += frontVec.x;
+		start.y += frontVec.y;
+		start.z += frontVec.z;
+	} else if (input_->PushKey(DIK_DOWN)) {
+		start.x -= frontVec.x;
+		start.y -= frontVec.y;
+		start.z -= frontVec.z;
+	}
+
+	//ベクトルの加算
+	worldTransfrom_.translation_.x = start.x;
+	worldTransfrom_.translation_.z = start.z;
+
+	//回転
+	worldTransfrom_.rotation_.y += rotaMove.y;
+	
 	//再計算
 	worldTransfrom_.UpdateMatrix();
+	viewProjection_.UpdateMatrix();
 
 	//デバッグ
 	debugText_->SetPos(0, 0);
