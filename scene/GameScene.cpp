@@ -25,12 +25,18 @@ void GameScene::Initialize() {
 
 	//x,y,z方向のスケーリング
 	worldTransfrom_.scale_ = {1.0f, 1.0f, 1.0f};
+	
+	worldObject_[0].scale_ = {1.0f, 1.0f, 1.0f};
+	worldObject_[1].scale_ = {1.0f, 1.0f, 1.0f};
 
 	//x,y,z軸周りの回転角を設定
 	worldTransfrom_.rotation_ = {0.0f, 0.0f, 0.0f};
+	
 
 	//z,y,z軸周りの平行移動を設定
 	worldTransfrom_.translation_ = {0.0f, 0.0f, 0.0f};
+	worldObject_[0].translation_ = {10.0f, 0.0f, 10.0f};
+	worldObject_[1].translation_ = {-10.0f, 0.0f, 10.0f};
 
 	//カメラ視点座標を設定
 	viewProjection_.eye = {0, 15, -20};
@@ -40,10 +46,10 @@ void GameScene::Initialize() {
 
 	//viewProjection_.up = {0.0f, 0.0f, 0.0f};
 
-
 	//ワールドトランスフォームの初期化
 	worldTransfrom_.Initialize();
-
+	worldObject_[0].Initialize();
+	worldObject_[1].Initialize();
 	//ビュープロジェクションの初期化
 	viewProjection_.Initialize();
 }
@@ -53,8 +59,11 @@ void GameScene::Update() {
 	XMFLOAT3 length = {0, 0, 10};
 	//正面ベクトルの長さ(大きさ)
 	float frontVecLength = 0;
+	float reverseVecLength = 0;
 	//正面ベクトル
 	XMFLOAT3 frontVec = {0, 0, 0};
+	//逆ベクトル
+	XMFLOAT3 reverseVec = {0, 0, 0};
 	//始点
 	XMFLOAT3 start = {worldTransfrom_.translation_};
 	//終点
@@ -65,14 +74,17 @@ void GameScene::Update() {
 	XMFLOAT3 rotaMove = {0, 0, 0};
 
 	//オブジェクトの回転スピード
-	const float rotaSpeed = 0.05f;
+	const float rotaSpeed = 0.05f;	
 
-	//オブジェクトの回転
+	//キー入力で回転
 	if (input_->PushKey(DIK_RIGHT)) {
 		rotaMove = {0, rotaSpeed, 0};
 	} else if (input_->PushKey(DIK_LEFT)) {
 		rotaMove = {0, -rotaSpeed, 0};
 	}
+
+	//回転(座標の更新)
+	worldTransfrom_.rotation_.y += rotaMove.y;
 
 	//終点座標を設定
 	end.x = start.x + length.x;
@@ -88,18 +100,28 @@ void GameScene::Update() {
 	frontVec.y = end.y - start.y;
 	frontVec.z = end.z - start.z;
 
+	//正面ベクトルの逆ベクトル
+	reverseVec.x = -frontVec.x;
+	reverseVec.y = frontVec.y;
+	reverseVec.z = -frontVec.z;
+
 	//正面ベクトルの長さ
-	frontVecLength = sqrtf(
-		(length.x * length.x) +
-		(length.y * length.y) +
-		(length.z * length.z));
+	frontVecLength = sqrtf((length.x * length.x) + (length.y * length.y) + (length.z * length.z));
+
+	//逆ベクトルの長さ
+	reverseVecLength = sqrtf((length.x * length.x) + (length.y * length.y) + (length.z * length.z));
 
 	//正面ベクトルの正規化
 	frontVec.x /= frontVecLength;
 	frontVec.y /= frontVecLength;
 	frontVec.z /= frontVecLength;
 
-	//始点座標に正面ベクトルの値を加算or減算
+	//逆ベクトルの正規化
+	reverseVec.x /= reverseVecLength;
+	reverseVec.y /= reverseVecLength;
+	reverseVec.z /= reverseVecLength;
+
+		//始点座標に正面ベクトルの値を加算or減算
 	if (input_->PushKey(DIK_UP)) {
 		start.x += frontVec.x;
 		start.y += frontVec.y;
@@ -114,9 +136,12 @@ void GameScene::Update() {
 	worldTransfrom_.translation_.x = start.x;
 	worldTransfrom_.translation_.z = start.z;
 
-	//回転
-	worldTransfrom_.rotation_.y += rotaMove.y;
-	
+	//カメラの追従(座標の更新)
+	viewProjection_.eye.x = reverseVec.x*300 + worldTransfrom_.translation_.x;
+	viewProjection_.eye.y = reverseVec.y+10 + worldTransfrom_.translation_.y;
+	viewProjection_.eye.z = reverseVec.z*300 + worldTransfrom_.translation_.z;
+	viewProjection_.target = worldTransfrom_.translation_;
+
 	//再計算
 	worldTransfrom_.UpdateMatrix();
 	viewProjection_.UpdateMatrix();
@@ -144,6 +169,9 @@ void GameScene::Update() {
 
 	debugText_->SetPos(0, 80);
 	debugText_->Printf("frontVec:(%f,%f,%f)", frontVec.x, frontVec.y, frontVec.z);
+
+	debugText_->SetPos(0, 100);
+	debugText_->Printf("reverseVec:(%f,%f,%f)", reverseVec.x, reverseVec.y, reverseVec.z);
 }
 
 void GameScene::Draw() {
@@ -175,7 +203,8 @@ void GameScene::Draw() {
 	/// </summary>
 	
 	model_->Draw(worldTransfrom_, viewProjection_, textureHandle_);
-
+	model_->Draw(worldObject_[0], viewProjection_, textureHandle_);
+	model_->Draw(worldObject_[1], viewProjection_, textureHandle_);
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();

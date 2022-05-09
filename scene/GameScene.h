@@ -63,5 +63,5 @@ class GameScene {
 	/// ゲームシーン用
 	/// </summary>
 	 
-	
+	WorldTransform worldObject_[2];
 };
